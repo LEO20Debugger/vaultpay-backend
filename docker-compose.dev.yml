@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # MySQL Database for Development
+  mysql-dev:
+    image: mysql:8.0
+    container_name: vaultpay-mysql-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: vaultpay_root_password
+      MYSQL_DATABASE: vaultpay
+      MYSQL_USER: vaultpay_user
+      MYSQL_PASSWORD: vaultpay_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+      - ./src/database/migrations:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Redis for Development (optional)
+  redis-dev:
+    image: redis:7-alpine
+    container_name: vaultpay-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+
+volumes:
+  mysql_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
